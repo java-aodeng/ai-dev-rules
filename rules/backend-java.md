@@ -50,4 +50,4 @@
 - AppService 通过 Req 的查询构造对象后再调用 Repository。
 - 如果只是分页查询，不额外包一层重复的 Service 方法。
 - core DTO 名称不要和 apps 层 `*Resp` 重名。
-
+- 列表分页命名优先 `pageByQuery`，仅在单一维度时再用 `selectByXxxPage`。

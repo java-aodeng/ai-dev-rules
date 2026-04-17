@@ -35,7 +35,8 @@ ai-dev-rules/
 │   ├── core.md               # 通用协作与输出规则
 │   ├── backend-java.md       # Java 后端规则
 │   ├── frontend-ant-design-pro.md # Ant Design Pro 前端规则
-│   └── project-template.md   # 项目规则模板
+│   ├── project-template.md   # 项目规则模板
+│   └── workspace-collaboration.md # 工作区协作、输出和 SQL 约定
 └── adapters/                 # 平台适配层
     └── codex/                # Codex 适配层
         ├── SKILL.md          # Codex 适配说明
@@ -49,6 +50,7 @@ ai-dev-rules/
 2. 再按技术栈读对应规则：
    - Java 后端读 `rules/backend-java.md`
    - Ant Design Pro 前端读 `rules/frontend-ant-design-pro.md`
+   - 需要工作区协作、输出或 SQL 规则时读 `rules/workspace-collaboration.md`
 3. 如果某个项目有自己的 `AGENTS.md`，以项目内规则为准。
 4. 如果要给某个具体仓库落地，参考 `examples/HOW_TO_APPLY.md`。
 5. 如果你在 Codex 中使用，读 `adapters/codex/SKILL.md`。

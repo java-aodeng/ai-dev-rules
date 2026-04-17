@@ -1,4 +1,4 @@
-# Project Template
+﻿# Project Template
 
 ## How to Adapt
 
@@ -39,5 +39,4 @@ project/
 
 ## Naming Notes
 
-- 如果项目有产品与仓库对应关系，建议单独写在 `rules/project-naming.md`
 - 命名说明应尽量保持可复用，不要直接绑死在单个任务上下文里

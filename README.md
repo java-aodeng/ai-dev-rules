@@ -1,4 +1,4 @@
-﻿# ai-dev-rules
+# ai-dev-rules
 
 `ai-dev-rules` 是一套给多种 AI 编程助手共用的开发规范仓库。
 
@@ -35,7 +35,7 @@ ai-dev-rules/
 │   ├── core.md               # 通用协作与输出规则
 │   ├── backend-java.md       # Java 后端规则
 │   ├── frontend-ant-design-pro.md # Ant Design Pro 前端规则
-│   ├── project-template.md   # 项目规则模板
+│   └── project-template.md   # 项目规则模板
 └── adapters/                 # 平台适配层
     └── codex/                # Codex 适配层
         ├── SKILL.md          # Codex 适配说明

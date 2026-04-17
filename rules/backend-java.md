@@ -33,6 +33,8 @@
 - 禁止弱语义命名，如 `Data`、`Result`、`Res`。
 - 新增对外契约不使用 `Vo` 风格。
 - 类名中的 DTO 缩写统一写作 `Dto`。
+- 管理端列表分页命名优先 `pageByQuery`，单一维度再用 `selectByXxxPage`。
+- core DTO 名称不要和 apps 层 `*Resp` 重名。
 
 ## Style
 
@@ -42,6 +44,7 @@
 - Java 注入仅使用 `@Resource` 字段注入。
 - `@Resource` 单独一行，写在字段上方。
 - 注释只保留复杂逻辑或坑点说明。
+- 能一行写完的代码优先一行写完，超过行宽再换行。
 
 ## Admin Pagination Pattern
 
@@ -49,5 +52,6 @@
 - core 只提供查询对象和 Repository / XML 映射用 DTO。
 - AppService 通过 Req 的查询构造对象后再调用 Repository。
 - 如果只是分页查询，不额外包一层重复的 Service 方法。
-- core DTO 名称不要和 apps 层 `*Resp` 重名。
-- 列表分页命名优先 `pageByQuery`，仅在单一维度时再用 `selectByXxxPage`。
+- 查询对象统一通过 `buildQuery()` 组装。
+- `Page<T> page = new Page<>(query.getCurrent(), query.getPageSize())` 后再调用 Repository。
+- 若只是主键或极简单条件查询，才允许不放进 XML。

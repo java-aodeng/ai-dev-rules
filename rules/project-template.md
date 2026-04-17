@@ -1,4 +1,4 @@
-﻿# Project Template
+# Project Template
 
 ## How to Adapt
 
@@ -36,7 +36,3 @@ project/
     ├── src/
     └── services/
 ```
-
-## Naming Notes
-
-- 命名说明应尽量保持可复用，不要直接绑死在单个任务上下文里

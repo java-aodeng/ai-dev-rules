@@ -7,8 +7,8 @@ alwaysApply: true
 
 ## 适用范围
 
-- 默认以 **慧查宝** 后端 `huichabao` 与前端管理端 `huichabao-admin` 为准；工作区内其它仓库（如 H5、悦享查等）**仅采纳与本技术栈一致、不冲突的条目**。
-- 前端「openapi / typings / Ant Design」相关段落主要针对 **Ant Design Pro 管理端**（如 `huichabao-admin`）。
+- 默认以当前主项目的后端与前端管理端为准；工作区内其它仓库仅采纳与本技术栈一致、不冲突的条目。
+- 前端「openapi / typings / Ant Design」相关段落主要针对 Ant Design Pro 管理端。
 
 ## 注释
 
@@ -17,7 +17,7 @@ alwaysApply: true
 ## 代码审查输出
 
 - 代码审查、review finding、问题说明、结论与建议统一使用中文；除非用户明确要求英文，不得默认输出英文 review 内容。
-- 用户只要说 **「查查代码」**，默认执行：review 当前代码改动，重点看改了什么、有没有 bug、有没有可提的优化点、有没有过度设计、防御性代码或兼容性代码；默认以当前未提交改动为审查范围，直接给出 review 结论和问题点，不先反问是否要 review。
+- 用户只要说「查查代码」，默认执行：review 当前代码改动，重点看改了什么、有没有 bug、有没有可提的优化点、有没有过度设计、防御性代码或兼容性代码；默认以当前未提交改动为审查范围，直接给出 review 结论和问题点，不先反问是否要 review。
 
 ## Controller HTTP 契约
 
@@ -41,17 +41,17 @@ alwaysApply: true
 
 ### 管理端分页列表（apps + Repository）
 
-- **HTTP 契约**：管理端列表的 Req、Resp 定义在对应 **apps** 模块（如 `huichabao-admin-app`）；core 仅提供查询对象（由 `buildQuery()` 构造）及 Repository / XML 映射用的 DTO。
-- **调用方式**（对齐 `/admin/complain/page`）：`AppService` 中由 Req 的 `buildQuery()` 得到 core 侧查询对象；`Page<T> page = new Page<>(query.getCurrent(), query.getPageSize())`；调用 **`XxxRepository.pageByQuery(page, query)`**；将 `result.getRecords()` 映射为 apps 层 `*PageItemResp` 后封装返回分页。
+- **HTTP 契约**：管理端列表的 Req、Resp 定义在对应 **apps** 模块；core 仅提供查询对象（由 `buildQuery()` 构造）及 Repository / XML 映射用的 DTO。
+- **调用方式**（对齐示例分页接口）：`AppService` 中由 Req 的 `buildQuery()` 得到 core 侧查询对象；`Page<T> page = new Page<>(query.getCurrent(), query.getPageSize())`；调用 **`XxxRepository.pageByQuery(page, query)`**；将 `result.getRecords()` 映射为 apps 层 `*PageItemResp` 后封装返回分页。
 - **Core Service**：若仅为分页查询、无额外领域编排，**不必**在 Core Service 再包一层 `pageForAdmin` 之类方法，避免与 Repository 重复。
-- **core 与 apps 类型命名（禁止靠全限定类名区分）**：MyBatis `resultType`、Repository 泛型使用的 **core DTO（行视图、详情载体等）不得与 apps 层 `*Resp` 类名相同**（例如行数据用 `XxxPageListDto` 或投诉侧的 `ComplainPageDto`，apps 仍用 `XxxPageItemResp`；详情 core 用 `XxxDetailDto`，apps 用 `XxxDetailResp`）。**禁止**在业务代码中用 `com....admin.vo.resp....` 等全限定名消除同名冲突；应 **重命名 core DTO** 消除歧义。
+- **core 与 apps 类型命名（禁止靠全限定类名区分）**：MyBatis `resultType`、Repository 泛型使用的 **core DTO（行视图、详情载体等）不得与 apps 层 `*Resp` 类名相同**（例如行数据用 `XxxPageListDto`，apps 仍用 `XxxPageItemResp`；详情 core 用 `XxxDetailDto`，apps 用 `XxxDetailResp`）。**禁止**在业务代码中用全限定名消除同名冲突；应 **重命名 core DTO** 消除歧义。
 - **缩写后缀**：Java 类名中 DTO 缩写按仓库 Checkstyle 写为 **`Dto`**（如 `AnnouncementPageListDto`），不写 `DTO`。
 
 ## 编码风格
 
 - 4 空格缩进；包小写，类 PascalCase，方法/字段 camelCase，常量 UPPER_SNAKE_CASE。
 - 无 wildcard import；方法 ≤150 行；用 Lombok、Bean Validation。
-- **注入**（慧查宝 Java 服务）：仅用 `@Resource` 字段注入，`@Resource` 单独一行在字段上方；禁止 `@Autowired`、`@Inject`、`@RequiredArgsConstructor`、单行 `@Resource private Xxx xxx;`。
+- **注入**（Java 服务）：仅用 `@Resource` 字段注入，`@Resource` 单独一行在字段上方；禁止 `@Autowired`、`@Inject`、`@RequiredArgsConstructor`、单行 `@Resource private Xxx xxx;`。
 - **单行优先（强制）**：能一行写完的代码默认写成一行；仅当超过 `checkstyle.xml` 行长限制（120）时才换行。
 - **日志合并（强制）**：调用第三方接口时，请求参数日志与返回参数日志默认合并为同一条日志打印，减少日志条数。
 - **极简第一（强制）**：设计与实现优先最小可行方案，禁止为“可能的未来需求”做过度抽象、过度封装或过度分层。
@@ -60,7 +60,7 @@ alwaysApply: true
 
 - **一律用 `npm run openapi` 生成**：`services/ant-design-pro/` 下的接口、`typings.d.ts` 中的 API 类型均由该命令从后端 Swagger 自动生成。
 - **禁止**：手动新增或修改生成的 `*Controller.ts`、`typings.d.ts` 中的 API 类型；后端改接口后必须先跑 `npm run openapi` 再改前端调用。
-- **AI 改后端接口时的约定**：**不要**代写或代改 `services/ant-design-pro/` 下接口文件及 `typings.d.ts` 中的 API 类型；**只需在收尾提醒**用户在对应前端工程（如 `huichabao-admin`）**手动执行** `npm run openapi` 同步生成物，再继续改前端业务调用。
+- **AI 改后端接口时的约定**：**不要**代写或代改 `services/ant-design-pro/` 下接口文件及 `typings.d.ts` 中的 API 类型；**只需在收尾提醒**用户在对应前端工程**手动执行** `npm run openapi` 同步生成物，再继续改前端业务调用。
 - **强制暂停**：当同一个需求同时包含“后端接口改动”和“前端调用改动”时，Codex 必须先完成后端并明确提示用户手动执行前端工程的 `npm run openapi`；在用户确认已执行前，**不得继续修改前端业务代码**。
 - **联动改动顺序**：凡是同一个需求同时涉及前后端，默认必须按“先后端、后前端”的顺序执行；后端改完后立即暂停，明确提示用户手动执行对应前端工程的 `npm run openapi`，并等待用户确认后再继续前端业务改动。禁止在同一轮里把后端接口改动和前端业务改动一起完成。
 
@@ -130,13 +130,12 @@ alwaysApply: true
 - `CREATE TABLE` / `ALTER TABLE` 等复杂 DDL 语句按可读性**正常换行**。
 - 无论简单 DML 还是复杂 DDL，默认都遵循“**只在文件末尾追加**”原则。
 
-
 ## 多项目协作与防卡顿（强制）
 
-- 工作区为 `D:\work` 时，默认采用「**主项目写入 + 参考项目只读**」模式。
-- 每次任务必须先明确主项目（例如 `D:\work\huichabao`）；**仅允许在主项目内写文件**。
-- 参考项目（例如 `D:\work\yuexiangcha`）仅用于对照实现，默认禁止写入；除非用户明确授权。
-- **禁止默认全盘扫描 `D:\work`**；仅在用户明确要求时才允许跨项目全量扫描。
+- 工作区默认采用「**主项目写入 + 参考项目只读**」模式。
+- 每次任务必须先明确主项目；**仅允许在主项目内写文件**。
+- 参考项目仅用于对照实现，默认禁止写入；除非用户明确授权。
+- **禁止默认全盘扫描**；仅在用户明确要求时才允许跨项目全量扫描。
 - 读取代码优先只看用户点名的文件或目录，再顺着直接引用向外看一层；禁止为了“保险”主动做全仓库递归扫描。
 - 用户未明确要求时，不要用全局搜索覆盖整个项目；如果范围不清楚，先缩小到当前需求相关模块。
 - 搜索范围默认限制在业务目录：Java 项目优先 `apps/core/commons/src`，前端项目优先 `src/config/docs`。
@@ -144,6 +143,7 @@ alwaysApply: true
 - 单次输出默认不超过 120 行；先给结论，再按需展开日志细节。
 - 需要跨项目参考时，优先“按文件路径精确读取”，禁止无目的递归遍历。
 - 用户未特别说明时，按 `80% 单项目开发 + 20% 跨项目只读参考` 执行。
+
 ## 近期协作约定（2026-03-27）
 
 - **Maven 命令禁止**使用 `-Dmaven.repo.local=.m2repo`（避免在仓库根目录生成 `.m2repo`）。

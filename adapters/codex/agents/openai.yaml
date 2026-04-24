@@ -1,7 +1,0 @@
-﻿interface:
-  display_name: "AI 开发规范"
-  short_description: "适用于多种 AI 编程助手的开发规范"
-  default_prompt: "先阅读 $ai-dev-rules-codex，再按共享开发规范处理当前任务。"
-
-policy:
-  allow_implicit_invocation: true

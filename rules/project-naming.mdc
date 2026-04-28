@@ -7,13 +7,14 @@ alwaysApply: true
 
 ## 当前工作重点
 
-- 默认主要开发目标是当前主项目及其管理端、H5 和伙伴端应用。
-- 其他产品默认只作为参考代码来源，不主动扩展为当前主开发范围；只有用户明确点名时，才切到对应项目。
+- 默认主要开发目标是 {{PROJECT_MAIN_NAME}}：`{{PROJECT_MAIN_BACKEND}}`、`{{PROJECT_MAIN_ADMIN}}`、`{{PROJECT_MAIN_PARTNER_ADMIN}}`、`{{PROJECT_MAIN_H5}}`。
+- {{PROJECT_REF_A_NAME}} 与 {{PROJECT_REF_B_NAME}} 默认只作为参考代码来源，不主动扩展为当前主开发范围；只有用户明确点名时，才切到对应项目。
+- 如果同目录存在 `local-overrides.mdc`，以其中的本机项目别名和路径映射为准；本文件只维护通用的产品与项目关系。
 
 ## 产品与项目对应
 
 | 产品 | 后端仓库 | 前端项目 | 备注 |
 |------|----------|---------|------|
-| 主产品 A | `backend-service-a` | `admin-app-a` | 主项目 |
-| 参考产品 B | `backend-service-b` | `admin-app-b` | 参考项目 |
-| 参考产品 C | `backend-service-c` | `admin-app-c` | 参考项目 |
+| {{PROJECT_REF_A_NAME}} | `{{PROJECT_REF_A_BACKEND}}` | `{{PROJECT_REF_A_ADMIN}}` | 参考项目 |
+| {{PROJECT_REF_B_NAME}} | `{{PROJECT_REF_B_BACKEND}}` | `{{PROJECT_REF_B_ADMIN}}` | 参考项目 |
+| {{PROJECT_MAIN_NAME}} | `{{PROJECT_MAIN_BACKEND}}` | `{{PROJECT_MAIN_ADMIN}}`、`{{PROJECT_MAIN_PARTNER_ADMIN}}`、`{{PROJECT_MAIN_H5}}` | 主开发项目 |

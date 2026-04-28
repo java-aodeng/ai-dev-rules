@@ -1,0 +1,22 @@
+# 本机私有覆写模板
+
+# 复制本文件为 `local-overrides.mdc` 后，只在本机填写真实值，不要提交到仓库。
+# 公共规则文件中出现的 `{{变量名}}`，都从这里读取含义。
+
+WORKSPACE_ROOT = 这个填你的工作目录，比如所有项目所在的根目录
+RULES_ROOT = 这个填 ai-dev-rules 的 rules 目录
+MEMORY_DIR = 这个填你的会话记忆目录
+
+PROJECT_MAIN_NAME = 这个填你的主开发产品名称
+PROJECT_MAIN_BACKEND = 这个填你的主产品后端仓库名
+PROJECT_MAIN_ADMIN = 这个填你的主产品管理端仓库名
+PROJECT_MAIN_H5 = 这个填你的主产品 H5 仓库名
+PROJECT_MAIN_PARTNER_ADMIN = 这个填你的主产品伙伴端或合伙人端仓库名
+
+PROJECT_REF_A_NAME = 这个填你的第一个参考产品名称
+PROJECT_REF_A_BACKEND = 这个填第一个参考产品后端仓库名
+PROJECT_REF_A_ADMIN = 这个填第一个参考产品管理端仓库名
+
+PROJECT_REF_B_NAME = 这个填你的第二个参考产品名称
+PROJECT_REF_B_BACKEND = 这个填第二个参考产品后端仓库名
+PROJECT_REF_B_ADMIN = 这个填第二个参考产品管理端仓库名

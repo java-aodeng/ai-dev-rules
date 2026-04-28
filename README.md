@@ -19,13 +19,15 @@ ai-dev-rules/
 
 1. 把 `ai-dev-rules` 放到你的工作目录里，和业务项目同级。
 2. 在 `ai-dev-rules/rules/` 目录下创建 `local-overrides.mdc`。
-3. 在 `local-overrides.mdc` 里填写你的本机路径和项目映射。
-4. 让 AI 读取 `ai-dev-rules/rules/coding-standards.mdc`、`ai-dev-rules/rules/project-naming.mdc` 和 `ai-dev-rules/rules/local-overrides.mdc`。
 
-`local-overrides.mdc` 示例：
+
+`local-overrides.mdc` 配置示例：
 
 ```md
-# local-overrides.mdc
+# 本机私有覆写
+
+# 这个文件包含本机真实路径与项目映射，已被 `.gitignore` 忽略，不提交到开源仓库。
+# 公共规则文件中出现的 `{{变量名}}`，都从这里读取含义。
 
 WORKSPACE_ROOT = 这个填你的工作目录 如：D:\work
 RULES_ROOT = 这个填 ai-dev-rules 的 rules 目录 如：D:\work\ai-dev-rules\rules
@@ -47,6 +49,9 @@ PROJECT_REF_B_ADMIN = 这个填第二个参考产品管理端仓库名
 ```
 
 `rules/local-overrides.mdc` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
+
+3. 让 AI 读取 D:\work\ai-dev-rules\rules 下的规则文件，优先读取 local-overrides.mdc。
+4. 第三行的指令可以配置在全局指令里面，如codex 设置里面的全局指令，没有就让ai自动读取
 
 ## License
 

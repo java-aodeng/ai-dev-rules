@@ -20,7 +20,6 @@ ai-dev-rules/
 1. 把 `ai-dev-rules` 放到你的工作目录里，和业务项目同级。
 2. 在 `ai-dev-rules/rules/` 目录下创建 `local-overrides.mdc`。
 
-
 `local-overrides.mdc` 配置示例：
 
 ```md
@@ -48,10 +47,14 @@ PROJECT_REF_B_BACKEND = 这个填第二个参考产品后端仓库名
 PROJECT_REF_B_ADMIN = 这个填第二个参考产品管理端仓库名
 ```
 
-`rules/local-overrides.mdc` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
-
 3. 让 AI 读取 D:\work\ai-dev-rules\rules 下的规则文件，优先读取 local-overrides.mdc。
-4. 第三行的指令可以配置在全局指令里面，如codex 设置里面的全局指令，没有就让ai自动读取
+
+## 补充说明
+> `rules/local-overrides.mdc` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
+>
+> `memory/` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
+>
+> 第 3 步的指令可以配置在全局指令里面，比如 Codex 设置里的全局指令；如果没有，就让 AI 自动读取。
 
 ## License
 

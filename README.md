@@ -2,59 +2,35 @@
 
 `ai-dev-rules` 是一套给多种 AI 编程助手共用的开发规范仓库。
 
-## 仓库结构
+## 规范文件
 
 ```text
 ai-dev-rules/
-├── README.md                 # 仓库总说明
-├── LICENSE                   # MIT 许可证
-├── .gitignore                # Git 忽略规则
-└── rules/                    # 通用规则区
-    ├── coding-standards.mdc  # 通用编码规范与协作约定
-    ├── project-naming.mdc    # 项目与产品对应关系
-    └── local-overrides.mdc   # 本机私有配置文件，需要自己创建，创建教程见下方说明
+└── rules/
+    └── coding-standards.mdc  # 唯一需要 AI 读取的规范文件
 ```
+
+这是唯一需要 AI 读取的规范文件，包含通用编码规范、协作约定、多项目识别方式和条件适用的技术规则。
 
 ## 如何使用
 
-1. 把 `ai-dev-rules` 放到你的工作目录里，和业务项目同级。
-2. 在 `ai-dev-rules/rules/` 目录下创建 `local-overrides.mdc`。
+把 `ai-dev-rules` 放到你的工作目录里，和业务项目同级即可。
 
-`local-overrides.mdc` 配置示例：
+推荐在 Codex 全局指令里只写入口规则，不写具体项目路径：
 
-```md
-# 本机私有覆写
+```text
+默认使用中文沟通，回答先给结论，再给关键原因。
 
-# 这个文件包含本机真实路径与项目映射，已被 `.gitignore` 忽略，不提交到开源仓库。
-# 公共规则文件中出现的 `{{变量名}}`，都从这里读取含义。
+不要在每个新会话自动读取 D:\work\ai-dev-rules\rules 下的规则文件。
 
-WORKSPACE_ROOT = 这个填你的工作目录 如：D:\work
-RULES_ROOT = 这个填 ai-dev-rules 的 rules 目录 如：D:\work\ai-dev-rules\rules
-MEMORY_DIR = 这个填你的会话记忆目录 如 D:\work\ai-dev-rules\memory
+当用户明确说“读取规范”“按规范来”“查查代码”，或请求涉及本地代码修改、代码审查、项目排查、运行命令时，才读取规则文件。
 
-PROJECT_MAIN_NAME = 这个填你的主开发产品名称
-PROJECT_MAIN_BACKEND = 这个填你的主产品后端仓库名
-PROJECT_MAIN_ADMIN = 这个填你的主产品管理端仓库名
-PROJECT_MAIN_H5 = 这个填你的主产品 H5 仓库名
-PROJECT_MAIN_PARTNER_ADMIN = 这个填你的主产品伙伴端或合伙人端仓库名
+读取规则时读取：
+D:\work\ai-dev-rules\rules\coding-standards.mdc
 
-PROJECT_REF_A_NAME = 这个填你的第一个参考产品名称
-PROJECT_REF_A_BACKEND = 这个填第一个参考产品后端仓库名
-PROJECT_REF_A_ADMIN = 这个填第一个参考产品管理端仓库名
-
-PROJECT_REF_B_NAME = 这个填你的第二个参考产品名称
-PROJECT_REF_B_BACKEND = 这个填第二个参考产品后端仓库名
-PROJECT_REF_B_ADMIN = 这个填第二个参考产品管理端仓库名
+如果用户当前消息给出了项目路径，优先以该路径作为当前项目。
+如果只是普通聊天、解释概念、临时问答，不要主动读取规则文件。
 ```
-
-3. 让 AI 读取 D:\work\ai-dev-rules\rules 下的规则文件，优先读取 local-overrides.mdc。
-
-## 补充说明
-> `rules/local-overrides.mdc` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
->
-> `memory/` 已在 `.gitignore` 中忽略，可以直接写真实值，不会提交到开源仓库。
->
-> 第 3 步的指令可以配置在全局指令里面，比如 Codex 设置里的全局指令；如果没有，就让 AI 自动读取。
 
 ## License
 

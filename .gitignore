@@ -9,9 +9,3 @@
 .vscode/
 *.swp
 *.swo
-
-# Local machine overrides
-rules/local-overrides.mdc
-
-# Local memory
-memory/

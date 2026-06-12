@@ -1,5 +1,5 @@
 ---
-description: 编码规范：注释、契约、分页、持久层、分层、风格、前端请求类型、枚举与错误提示
+description: 编码规范：注释、契约、分页、持久层、分层、风格、前端请求、枚举、错误提示、改动边界与验证
 alwaysApply: true
 ---
 
@@ -7,185 +7,186 @@ alwaysApply: true
 
 ## 适用范围
 
-- 默认以 **{{PROJECT_MAIN_NAME}}** 后端 `{{PROJECT_MAIN_BACKEND}}` 与前端管理端 `{{PROJECT_MAIN_ADMIN}}` 为准；工作区内其它仓库（如 H5、参考项目等）**仅采纳与本技术栈一致、不冲突的条目**。
-- 前端「openapi / typings / Ant Design」相关段落主要针对 **Ant Design Pro 管理端**（如 `{{PROJECT_MAIN_ADMIN}}`）。
-- 如果同目录存在 `local-overrides.mdc`，优先读取其中的本机路径、项目别名和 memory 映射，再解释本文件里的通用规则。
+- 不在规则文件中固定当前项目；当前项目由用户本次消息给出的路径、当前工作目录或项目文件结构决定。
+- 如果用户本次消息给出项目路径，以用户给出的路径为最高优先级。
+- 不引用、不套用历史项目的项目名、业务名或目录名；但保留通用工程纪律和可复用技术规范。
+- 技术专项规则按“项目实际采用才生效”执行：当前项目没用 Ant Design Pro、openapi、ProTable、apps/core 等能力时，不触发对应条目；以后项目使用这些技术时，再按对应规则执行。
+- 当前项目没有明确采用的框架能力，不强行套规则；遇到与现有代码冲突时，先以当前项目真实结构为准。
 
 ## 注释
 
-- 不写冗余、占位、显而易见的注释；默认不添加，仅保留复杂逻辑或坑点说明。
+- 不写冗余、占位、显而易见的注释；默认不添加。
+- 仅在复杂业务规则、非直观兼容逻辑、坑点规避、外部系统约束处补简短说明。
+- 新增的非平凡辅助方法需要补一句简短注释，说明业务目的或外部约束；历史旧方法和旧注释不因本次需求顺手重写。
+- 禁止用注释解释代码表面行为，例如“设置变量”“调用接口”。
 
 ## 代码审查输出
 
-- 代码审查、review finding、问题说明、结论与建议统一使用中文；除非用户明确要求英文，不得默认输出英文 review 内容。
-- 用户只要说 **「查查代码」**，默认执行：review 当前代码改动，重点看改了什么、有没有 bug、有没有可提的优化点、有没有过度设计、防御性代码或兼容性代码；默认以当前未提交改动为审查范围，直接给出 review 结论和问题点，不先反问是否要 review。
+- 代码审查、review finding、问题说明、结论与建议统一使用中文；除非用户明确要求英文。
+- 用户只要说 **「查查代码」**，默认 review 当前代码改动。
+- review 重点：改了什么、有没有 bug、有没有行为回归、有没有遗漏验证、有没有过度设计、防御性代码或兼容性代码。
+- 默认以当前未提交改动为审查范围，直接给出 review 结论和问题点，不先反问是否要 review。
 
 ## Controller HTTP 契约
 
-- **入参**：Controller 必须用 apps 层 Req（如 `AdminXxxPageReq`），不得直接用 core DTO；Req 提供 `buildQuery()` 转为 core Query。
-- **出参**：Controller 必须返回 apps 层 Resp，不得直接返回 core DTO/entity；AppService 内用 `toResp()` / `toPageItemResp()` 映射。
-- **禁止**：Controller 直接接收/返回 core 层 DTO；多端共用同一 core Req 作为 HTTP 契约。
-- **参数**：`@PathVariable("id")` 显式命名；分页/筛选用请求对象 `@Validated XxxReq req`。
-- **方法名**：动作+资源，如 `listRoles`、`pageUsers`；禁止跨 Controller 复用 `list/detail/page` 等通用名；改接口后自检 `GET /v3/api-docs`：JSON 中无 `"arg0"`，各路径 `operationId` 无编号后缀；可本地拉取后 `grep`/脚本检索，避免仅凭肉眼扫。
-- **API 文档**：保留 SpringDoc、`<parameters>true</parameters>`；禁止新增 Swagger 注解（`@Schema`、`@Tag`、`@Operation` 等）。
-- **命名**：新建 HTTP 契约类型用 **Req/Resp** 后缀；禁止弱语义 `Data`、`Result`、`Res`。**新增**对外契约不再使用 `*Vo`；历史已有 `Vo` 类不强制批量改名。
+- **入参**：Controller 不直接接收数据库实体；新增接口优先使用明确的请求对象，例如 `XxxReq`、`XxxPageReq`、`XxxQueryReq`。
+- **出参**：Controller 不直接返回数据库实体；新增接口优先返回明确的响应对象，例如 `XxxResp`、`XxxDetailResp`、`XxxPageItemResp`。
+- **参数**：`@PathVariable("id")` 显式命名；复杂查询、分页、筛选使用请求对象承载。
+- **校验**：请求对象按需使用 Bean Validation；Controller 参数入口加 `@Validated` 或当前项目已有等价写法。
+- **命名**：方法名使用动作 + 资源，例如 `listUsers`、`pageWarnings`、`getWarningDetail`；避免多个 Controller 里反复使用模糊的 `list/detail/page`。
+- **接口注释**：新增或调整 Controller 公开接口时，在每个接口方法上方补一段简短 JavaDoc，说明该接口的业务用途，避免展开实现细节。
+- **异常处理**：项目优先使用全局异常处理器；新增 Controller 接口不要在每个方法里重复包 `try/catch`，业务异常由 Service 抛出并交给全局处理，只有接口存在明确的特殊响应格式或补偿逻辑时才局部捕获。
+- **禁止**：新增弱语义类型名，如 `Data`、`Result`、`Res`；历史已有类型不强制批量改名。
+- **API 文档**：如当前项目已有 SpringDoc/Swagger 约定，遵循现有风格；不要为了新接口随意混入另一套文档注解风格。
 
 ## 分页与持久层
 
-- **分页**：统一用 MyBatis-Plus `Page<T>`，不用 `PageResult`；首参为 `Page<T> page`。
-- **SQL**：多条件、排序、联表、统计、分页列表等查询 **一律写在 XML**；Repository 中不用 `LambdaQueryWrapper` 拼条件。仅主键或极简单单条件查询（如 `selectById`）及 MyBatis-Plus 生成器约定的基础方法可不在 XML 中重复声明。
-- **参数**：查询对象用 `@Param("param")`，XML 条件片段外层加 `<if test="param != null">` 防 NPE。
-- **命名**：列表分页默认 **`pageByQuery`**；仅当确为单一维度分页时用 `selectByXxxPage`；联表行视图用 `pageByQueryWithDetails`。
-- **更新**：优先定向 SQL 更新，禁止先查实体再 `save/updateById` 整对象；禁止 JPA/Hibernate。
-- **ID**：业务主键用雪花 ID（`IdUtils.nextId()`）；SQL 示例数据禁止占位 ID（如 `100000...0001`）。
-- **禁止**：Repository 中用 `selectPage(page, Wrappers.lambdaQuery()...)`；XML 中 `param.xxx` 无空判断；用 `@Param("q")` 等非 `param` 命名。
+- **分页**：分页接口统一使用当前项目已有分页方案；如果已有 PageHelper，就优先沿用 PageHelper，不引入另一套分页框架。
+- **SQL**：多条件、排序、联表、统计、分页列表等查询优先写在 MyBatis XML；不要在 service/controller 中拼 SQL。
+- **Mapper**：改 SQL 时必须同步检查 mapper 接口、XML `id`、入参对象、返回对象。
+- **参数**：MyBatis 多参数方法使用 `@Param` 明确命名；XML 中访问对象属性前要考虑空值。
+- **命名**：列表分页查询默认使用清晰语义，例如 `pageByQuery`、`selectPageByQuery`、`listByCondition`；不要用过宽泛的 `query`、`selectData`。
+- **更新**：优先定向更新需要变更的字段；避免先查实体再整对象覆盖保存，除非当前项目已有明确模式或业务确实需要。
+- **事务**：跨多表、多资源、有状态一致性要求的写操作放在 service 层事务中；Controller 不写事务。
+- **禁止**：JPA/Hibernate 风格混入 MyBatis 项目；无必要不新增另一套 ORM 或持久层抽象。
 
-### 管理端分页列表（apps + Repository）
+## 后端分层与依赖
 
-- **HTTP 契约**：管理端列表的 Req、Resp 定义在对应 **apps** 模块（如 `{{PROJECT_MAIN_ADMIN}}-app`）；core 仅提供查询对象（由 `buildQuery()` 构造）及 Repository / XML 映射用的 DTO。
-- **调用方式**（对齐 `/admin/complain/page`）：`AppService` 中由 Req 的 `buildQuery()` 得到 core 侧查询对象；`Page<T> page = new Page<>(query.getCurrent(), query.getPageSize())`；调用 **`XxxRepository.pageByQuery(page, query)`**；将 `result.getRecords()` 映射为 apps 层 `*PageItemResp` 后封装返回分页。
-- **Core Service**：若仅为分页查询、无额外领域编排，**不必**在 Core Service 再包一层 `pageForAdmin` 之类方法，避免与 Repository 重复。
-- **core 与 apps 类型命名（禁止靠全限定类名区分）**：MyBatis `resultType`、Repository 泛型使用的 **core DTO（行视图、详情载体等）不得与 apps 层 `*Resp` 类名相同**（例如行数据用 `XxxPageListDto` 或投诉侧的 `ComplainPageDto`，apps 仍用 `XxxPageItemResp`；详情 core 用 `XxxDetailDto`，apps 用 `XxxDetailResp`）。**禁止**在业务代码中用 `com....admin.vo.resp....` 等全限定名消除同名冲突；应 **重命名 core DTO** 消除歧义。
-- **缩写后缀**：Java 类名中 DTO 缩写按仓库 Checkstyle 写为 **`Dto`**（如 `AnnouncementPageListDto`），不写 `DTO`。
+- **Controller**：路由、参数校验、调用 service、返回结果；禁止堆业务规则、事务、复杂数据组装。
+- **Service**：业务规则、用例编排、事务边界、跨 mapper 调用。
+- **Mapper/XML**：只做数据访问；禁止承载业务判断。
+- **POJO/DTO/VO**：按当前项目既有命名使用；新增类型要表达清楚用途，避免同名不同义。
+- **Config/Interceptor/Aspect**：只放横切能力，例如鉴权、日志、签名、Web 配置、Redis/OSS 配置。
+- **Utils**：只放稳定通用工具；不要把业务逻辑塞进工具类。
+- **改动顺序**：优先定位 Controller/API 入口，再顺着 Service、Mapper、XML、前端调用查影响面。
 
-## 编码风格
+## 多模块后端分层（条件适用）
 
-- 4 空格缩进；包小写，类 PascalCase，方法/字段 camelCase，常量 UPPER_SNAKE_CASE。
-- 无 wildcard import；方法 ≤150 行；用 Lombok、Bean Validation。
-- **注入**（Java 服务）：仅用 `@Resource` 字段注入，`@Resource` 单独一行在字段上方；禁止 `@Autowired`、`@Inject`、`@RequiredArgsConstructor`、单行 `@Resource private Xxx xxx;`。
-- **单行优先（强制）**：能一行写完的代码默认写成一行；仅当超过 `checkstyle.xml` 行长限制（120）时才换行。
-- **日志合并（强制）**：调用第三方接口时，请求参数日志与返回参数日志默认合并为同一条日志打印，减少日志条数。
-- **极简第一（强制）**：设计与实现优先最小可行方案，禁止为“可能的未来需求”做过度抽象、过度封装或过度分层。
+- 仅当项目实际采用 apps/core/commons、admin-app、core-service、repository 等多模块架构时，本节生效。
+- **HTTP 契约**：Controller 入参、出参定义在对外入口模块，例如 apps/admin/app 层；core 层只提供领域对象、查询对象、领域 DTO 或 Repository/XML 映射对象。
+- **入参转换**：入口层 Req 可提供 `buildQuery()` 或等价方法，将 HTTP 请求对象转换为 core 侧查询对象；不要把 HTTP 契约直接传进 core。
+- **出参转换**：入口层 AppService 负责把 core DTO/entity 映射为 Resp；Controller 不直接返回 core DTO/entity。
+- **分页列表**：入口层负责组装分页参数、调用 Repository 或 core service、映射 `*PageItemResp` 并封装分页结果。
+- **Core Service**：只放领域规则、状态变更、领域编排；若只是普通分页查询，避免为了分层再包一层空转方法。
+- **Repository**：只做数据访问；禁止写业务规则、跨领域编排、HTTP 语义。
+- **依赖方向**：apps -> core -> commons；禁止 core 反向依赖 apps。
+- **类型命名**：core 侧 DTO 与入口层 Resp 不要同名；行视图可用 `XxxPageListDto`、`XxxDetailDto`，入口层使用 `XxxPageItemResp`、`XxxDetailResp`。
+- **缩写后缀**：Java 类名中 DTO 缩写按项目风格统一；如果项目已有 Checkstyle 要求 `Dto`，就写 `Dto`，不要混用 `DTO`。
+- **禁止**：用全限定类名解决同名冲突；应重命名 core DTO 或入口层 Resp 消除歧义。
 
-## 前端接口生成
+## 后端编码风格
 
-- **一律用 `npm run openapi` 生成**：`services/ant-design-pro/` 下的接口、`typings.d.ts` 中的 API 类型均由该命令从后端 Swagger 自动生成。
-- **禁止**：手动新增或修改生成的 `*Controller.ts`、`typings.d.ts` 中的 API 类型；后端改接口后必须先跑 `npm run openapi` 再改前端调用。
-- **AI 改后端接口时的约定**：**不要**代写或代改 `services/ant-design-pro/` 下接口文件及 `typings.d.ts` 中的 API 类型；**只需在收尾提醒**用户在对应前端工程（如 `{{PROJECT_MAIN_ADMIN}}`）**手动执行** `npm run openapi` 同步生成物，再继续改前端业务调用。
-- **强制暂停**：当同一个需求同时包含“后端接口改动”和“前端调用改动”时，Codex 必须先完成后端并明确提示用户手动执行前端工程的 `npm run openapi`；在用户确认已执行前，**不得继续修改前端业务代码**。
-- **联动改动顺序**：凡是同一个需求同时涉及前后端，默认必须按“先后端、后前端”的顺序执行；后端改完后立即暂停，明确提示用户手动执行对应前端工程的 `npm run openapi`，并等待用户确认后再继续前端业务改动。禁止在同一轮里把后端接口改动和前端业务改动一起完成。
+- Java 使用 4 空格缩进；包名小写；类名 PascalCase；方法和字段 camelCase；常量 UPPER_SNAKE_CASE。
+- 避免 wildcard import。
+- 单个方法建议不超过 150 行；超过时优先拆出有业务语义的私有方法，而不是为了拆而拆。
+- 使用 Lombok、Bean Validation 时遵循当前项目已有写法。
+- 注入方式优先保持当前项目一致；新代码不要混用多套注入风格。
+- 新增或调整业务日志时默认使用中文描述；配置 key、接口字段、第三方固定字段名等必须保持原文字面量的除外。
+- 调用第三方接口时，请求参数日志与返回参数日志优先合并到同一条上下文中，便于排查且减少日志噪音。
+- 设计与实现优先最小可行方案；禁止为“可能的未来需求”做过度抽象、过度封装或过度分层。
 
-## 前端请求参数与类型
+## 前端接口与请求
 
-- **优先用 API 类型**：请求参数、表单提交值等，直接使用 `typings.d.ts` 中生成的 `API.xxxReq`、`API.pageXxxParams`，不得再单独定义同名或等效类型。
-- **透传**：当表单字段与 API Req 完全一致时，表单 `onSubmit` 直接透传 `values` 给接口，禁止手动逐字段映射。
-- **表单提交写法保持直接**：搜索表单、查询表单、弹窗表单在字段与接口入参一致时，默认直接把 `values` / `params` 传给接口；只有接口入参确实需要嵌套对象，且生成类型明确要求时，才允许做一层最小包装。
-- **列表 request 写法保持直接**：`ProTable` 的 `request` 中，若生成接口支持直接接收 `params`，则使用 `pageXxx(params)`；不要再手动包一层 `req`，也不要为了适配接口额外组装一个中间对象（如 `pageXxx({ req: params })`）。
-- **避免多余断言**：列表返回值优先直接写 `data: res.data?.records ?? []`，不要在页面层补 `as API.Xxx[]` 这类无必要的类型断言。
-- **弹框状态优先独立布尔值**：页面存在多个弹框时，优先使用 `costExtraModalOpen`、`updateParentModalOpen` 这类独立布尔状态；不要为了收口状态而统一写成 `activeModal === 'updateParent'` 这类判断。
-- **页面组件拆分**：页面主文件只保留编排逻辑、状态流转和权限控制；独立弹窗、详情面板、表单等展示块优先抽到 `components/`，主文件不要直接堆大段 `Modal` / `Descriptions` / `Form` JSX。
+- 前端技术栈以当前项目为准：Vue 3、Vite、Element Plus、Axios、ECharts、Electron。
+- 接口调用优先复用 `front\src\api` 与 `front\src\utils\request.js` 的既有封装。
+- 不额外引入另一套请求库或接口生成方案，除非用户明确要求。
+- 表单字段与接口入参一致时，提交时优先直接透传 `values` 或做最小必要转换。
+- 不要为了适配接口额外组装无意义的中间对象；只有接口入参确实需要嵌套时才包装。
+- 列表返回值优先在接口层或页面数据入口做最小标准化，避免页面里到处补重复断言、重复兜底。
+- 涉及后端接口变更时，同步检查前端 `api` 封装、调用页面、表单字段、列表字段、枚举展示和错误提示。
+
+## 前端接口生成（条件适用）
+
+- 仅当项目实际采用 openapi/Swagger 生成前端接口、`typings.d.ts`、`services/*` 这类生成物时，本节生效。
+- **生成物优先**：接口文件和 API 类型由项目既有生成命令维护，例如 `npm run openapi` 或当前项目等价命令。
+- **禁止手改生成物**：不要手动新增或修改生成的 Controller API 文件、`typings.d.ts`、API namespace 类型；确需变更时先改后端契约，再重新生成。
+- **后端接口变更**：同一需求涉及后端接口和前端调用时，先完成后端契约，再运行或提醒运行接口生成命令，最后修改前端业务调用。
+- **暂停点**：如果生成命令需要用户本地环境、后端服务或认证信息，AI 完成后端后应明确提示用户执行生成命令，等用户确认后再继续改前端业务代码。
+- **类型优先**：请求参数、表单提交值、列表响应等优先使用生成的 API 类型；不要重复定义同名或等效类型。
+- **透传优先**：表单字段与生成 Req 完全一致时，直接传 `values`；只在接口明确要求嵌套或转换时做最小包装。
+
+## Ant Design Pro / ProTable（条件适用）
+
+- 仅当前端项目实际采用 Ant Design Pro、ProComponents、ProTable、ProForm 等技术时，本节生效。
+- **ProTable request**：若生成接口支持直接接收 `params`，优先 `pageXxx(params)`；不要额外包一层无意义的 `{ req: params }`。
+- **列表返回**：优先按 ProTable 约定返回 `data`、`success`、`total`；数据为空时使用 `records ?? []`、`total ?? 0` 这类最小兜底。
+- **类型断言**：列表数据优先依赖生成类型和接口返回类型；避免页面层到处补 `as API.Xxx[]` 这类无必要断言。
+- **ProForm 提交**：字段与 API Req 一致时直接透传；只在日期范围、枚举转换、文件上传等必要场景做最小转换。
+- **弹窗状态**：多个 Modal/Drawer 优先使用独立布尔状态或当前项目既有状态模式；不要为了统一写难读的 `activeModal` 状态机。
+- **页面拆分**：页面主文件保留列表编排、权限控制和状态流转；弹窗表单、详情面板、复杂描述块优先抽到 `components/`。
+- **权限控制**：按钮只绑定一个明确权限点；不要用多个不相关权限做兜底显示。
+
+## 前端组件与状态
+
+- UI 以当前项目已有 Element Plus、Vue 组件和页面风格为准。
+- 页面主文件保留编排逻辑、状态流转、权限控制；复杂弹窗、详情面板、表单块优先抽到同目录 `components` 或现有约定目录。
+- 多个弹窗/抽屉状态优先使用独立布尔值或当前项目既有状态模式；避免为了“统一”写出难读状态机。
+- 组件 props、emit 命名要表达业务含义；避免 `data`、`info`、`obj` 这类弱语义字段贯穿多层。
+- 涉及 Electron 桌面能力、窗口、IPC、自动更新、系统能力时，同时检查 `front\electron`。
 
 ## 前端枚举
 
-- **优先接口**：生成前端代码时，枚举一律通过后端接口获取（如 `dictEnumByNames`），不得在前端硬编码。
-- **兜底写死**：仅当后端不存在对应枚举类型时，才允许在前端写死枚举值。
+- 枚举优先通过后端接口、字典接口或当前项目已有常量来源获取。
+- 只有后端不存在对应枚举、且业务范围明确时，才允许在前端局部写死。
+- 写死枚举时集中放在当前项目已有常量位置；不要散落在多个页面。
+- 展示文案、颜色、状态映射保持单一来源，避免页面之间各写一份。
 
 ## 前端错误提示
 
-- **页面层默认不手写异常兜底**：单页面/业务组件中的接口调用默认不写 `.catch` 或 `try-catch` 做重复错误提示，异常交由请求基础层统一处理；`ProTable` / `ProList` / 页面内查询请求也包含在这条规则内。
-- **仅在明确需要时再局部处理**：只有该页面存在明确的定制化异常交互（如二次确认、特定业务补偿）时，才在页面层补充异常处理逻辑，且需写清原因。
+- 页面层默认不重复写通用异常兜底；如果请求基础层已有统一处理，页面不再重复弹相同错误。
+- 只有页面存在明确的定制化异常交互时，才在页面局部处理，例如二次确认、业务补偿、特殊引导。
+- 批量操作、导入导出、长耗时任务要明确 loading、禁用态和失败反馈。
+- 不吞异常；如果必须 catch，至少保证用户可感知或日志可排查。
 
 ## 前端权限判断
 
-- **单动作单权限**：一个按钮/操作仅绑定一个明确权限点（如 `orderManagement:orders:sendReportSms`），不要混入其它权限作为兜底显示条件。
-- **禁止双权限兜底**：禁止使用 `permA || permB` 的方式“放宽可见性”（如用 `updateReport` 兜底 `sendReportSms`）。
-
-## 分层与依赖
-
-- **Controller**：路由、校验、调用服务、返回；禁止业务规则、事务、Repository 直接访问。
-- **AppService**（apps/*/service）：用例编排、组装 DTO；禁止 SQL、核心领域规则。
-- **Core Service**：领域规则、状态变更、发布事件；禁止感知 HTTP/VO。
-- **Repository**：仅数据访问；禁止业务规则、跨领域调用。
-- **依赖**：apps → core → commons；禁止 core → apps；core-order 与 core-merchant 通过事件解耦。
-- **改动顺序**：优先 Controller/AppService → Core Service → Repository/Entity 最后。
+- 一个按钮或操作优先绑定一个明确权限点或当前项目已有权限判断方式。
+- 不用多个不相关权限做兜底显示条件。
+- 权限字段、菜单字段、路由 meta 要与当前项目已有权限体系保持一致。
 
 ## 改动边界
 
-- **最小改动原则**：只改与当前需求直接相关的文件，禁止为了“顺手修一下”去改 `config`、通用组件、公共工具、无关类型或其它页面。
-- **先确认再扩展**：如果实现过程中发现需要改到非当前需求文件，必须先停下来说明原因和影响，再等用户确认后继续。
-- **禁止顺手改别的文件**：不要为了类型兼容、联调通过、临时修错或优化体验去改无关文件；如果不是当前需求必须覆盖的路径，先撤回或保留原样。
-- **撤回无关改动**：如果某个文件的改动只是为了临时通过检查、联调或绕过类型报错，但不属于需求本身，应在交付前撤回。
-- **前端联动收敛**：后端接口变更后，只允许改当前需求对应页面和它直接依赖的生成物；禁止顺手调整其他页面、公共布局、配置或全局样式。
+- **最小改动原则**：只改与当前需求直接相关的文件。
+- **禁止顺手改无关文件**：不要为了类型兼容、联调通过、临时修错或优化体验去改无关页面、公共布局、全局样式、配置。
+- **兼容改造边界**：保留历史旧实现、旧注释、旧错误文案和旧代码结构；即使旧代码不规范，也只在必要位置接入新逻辑，新写代码按当前规范执行。
+- **先确认再扩展**：如果实现过程中发现需要改到非当前需求文件，先说明原因和影响，再继续。
+- **撤回无关改动**：如果某个文件的改动只是临时绕过检查或联调问题，但不属于需求本身，交付前应撤回。
+- **前后端联动收敛**：后端接口变更后，只改当前需求对应页面和它直接依赖的接口封装；不顺手调整其它页面。
 
-## 路径返回格式（Cursor 可跳转）
+## 搜索与读取范围
 
-- 目标：返回的文件路径必须能在本地 Cursor/VSCode 风格编辑器中打开，不能跳浏览器 webview。
-- 默认仅返回一条 markdown 路径链接（目标可用工作区绝对路径），避免冗余路径输出。
-- 仅当用户明确要求时，才补充纯文本绝对路径。
-- **默认定位格式（强制）**：凡是引用代码位置，必须使用“文件:行号”。
-- **可点击链接（强制）**：`[{{WORKSPACE_ROOT}}\xxx\file.ts:27](/workspace/xxx/file.ts:27)`
-- **纯文本路径（可选）**：`{{WORKSPACE_ROOT}}\xxx\file.ts:27`（仅在用户明确要求时提供）
-- **改动汇报固定格式**（强制）：按 `1. 2. 3.` 编号逐条列出，每条先写改动说明，再给文件超链接。
-- 超链接写法（默认带行号）：`[{{WORKSPACE_ROOT}}\xxx\file.ts:27](/workspace/xxx/file.ts:27)`
-- 一次改动涉及多个定位时，允许同一条下放多个定位；但仍保持单层编号列表，不用嵌套。
-- 若用户明确要求“像这次这样列出来”，必须使用上述编号格式，不得改成纯段落。
-- 响应优先级：
-  1. 可点击 markdown 链接
-  2. 纯文本绝对路径（仅用户明确要求时）
-- 禁止返回会跳浏览器的路径形式：`file://`、`vscode-resource`、`https://file+.vscode-resource...`
+- 默认工作根目录是用户本次指定的项目目录；如果没有明确项目目录，则以当前工作目录或最近的项目根目录为准。
+- 用户只给出文件路径时，以该文件所在仓库或最近的项目根目录作为当前项目。
+- 用户未给出路径但任务需要读写本地代码时，先根据当前工作目录判断；判断不清时，先问用户项目路径。
+- 搜索优先用 `rg`。
+- 禁止默认全盘扫描 `D:\work` 或其它工作区根目录；仅在用户明确要求时才跨工作区全量扫描。
+- 读取代码优先看用户点名文件或目录，再顺着直接引用向外看一层。
+- 跨项目参考只读优先；需要写入多个项目时，先说明影响范围。
+- 不主动读取或引用其它历史项目；用户明确给出其它路径时，才按该路径处理。
+- 搜索与遍历必须排除大目录：`.git`、`.idea`、`.vscode`、`node_modules`、`dist`、`target`、`build`、`.cache`、`logs`。
+- 后端任务优先搜索当前项目内的 `src/main/java`、`src/main/resources`、`pom.xml`、`build.gradle`、`application.yml` 等实际存在路径。
+- 前端任务优先搜索当前项目内的 `src`、`electron`、`package.json`、`vite.config.*`、`webpack.config.*` 等实际存在路径。
+- 前端/后端目录名不固定，必须以当前项目实际文件结构为准。
 
 ## SQL 变更追加与排版规则
 
-- 新增 SQL 语句统一**追加到目标 SQL 文件最后面**，不插入到中间位置。
-- `INSERT` / `UPDATE` / `DELETE` 这类简单语句统一写成**单行**。
-- `CREATE TABLE` / `ALTER TABLE` 等复杂 DDL 语句按可读性**正常换行**。
-- 无论简单 DML 还是复杂 DDL，默认都遵循“**只在文件末尾追加**”原则。
+- 新增 SQL 语句统一追加到目标 SQL 文件最后面，除非文件已有更明确的版本化规则。
+- `INSERT` / `UPDATE` / `DELETE` 这类简单语句优先写成单行。
+- `CREATE TABLE` / `ALTER TABLE` 等复杂 DDL 按可读性正常换行。
+- 改 SQL 必须说明影响表、影响字段和回滚方式或风险。
 
+## 验证习惯
 
-## 多项目协作与防卡顿（强制）
+- 后端改动后，按风险选择运行 `mvn test`、`mvn -DskipTests package` 或更小范围的 Maven 命令。
+- 前端改动后，按风险选择运行 `npm run lint`、`npm run build` 或与当前改动直接相关的检查。
+- 需求开发阶段不默认做“大而全”的统一检查；待用户明确要求后再集中做一次。
+- 不主动编写/修改单元测试；仅当用户明确要求“写测试”时再补充测试。
+- 如果命令因本地环境、数据库、Redis、网络或依赖问题无法运行，要在回复中明确说明。
 
-- 工作区为 `{{WORKSPACE_ROOT}}` 时，默认采用「**主项目写入 + 参考项目只读**」模式。
-- 每次任务必须先明确主项目（例如 `{{WORKSPACE_ROOT}}\{{PROJECT_MAIN_BACKEND}}`）；**仅允许在主项目内写文件**。
-- 参考项目（例如 `{{WORKSPACE_ROOT}}\{{PROJECT_REF_B_BACKEND}}`）仅用于对照实现，默认禁止写入；除非用户明确授权。
-- **禁止默认全盘扫描 `{{WORKSPACE_ROOT}}`**；仅在用户明确要求时才允许跨项目全量扫描。
-- 读取代码优先只看用户点名的文件或目录，再顺着直接引用向外看一层；禁止为了“保险”主动做全仓库递归扫描。
-- 用户未明确要求时，不要用全局搜索覆盖整个项目；如果范围不清楚，先缩小到当前需求相关模块。
-- 搜索范围默认限制在业务目录：Java 项目优先 `apps/core/commons/src`，前端项目优先 `src/config/docs`。
-- 搜索与遍历必须排除大目录：`.git`、`.idea`、`.vscode`、`node_modules`、`dist`、`target`、`build`、`.cache`。
-- 单次输出默认不超过 120 行；先给结论，再按需展开日志细节。
-- 需要跨项目参考时，优先“按文件路径精确读取”，禁止无目的递归遍历。
-- 用户未特别说明时，按 `80% 单项目开发 + 20% 跨项目只读参考` 执行。
-## 近期协作约定（2026-03-27）
+## 路径返回格式
 
-- **Maven 命令禁止**使用 `-Dmaven.repo.local=.m2repo`（避免在仓库根目录生成 `.m2repo`）。
-- 默认先**快速完成需求改动**，避免过度设计、过度重构与超范围优化。
-- 需求开发阶段默认不做“大而全”的统一检查；待用户明确要求后再集中做一次。
-- **不要主动编写/修改单元测试**；仅当用户明确要求“写测试”时再补充测试。
-- 当后端单个模块改动较大时，收尾需**明确提醒**用户执行：`mvn checkstyle:check -X`。
-  - 仅提醒，不由 AI 主动执行该命令。
-
-## 口令自动动作（上班 / 下班）
-
-- 用户说 **「上班」**：
-  - 默认先读取规范目录 `{{RULES_ROOT}}` 下的规则文件，至少包含：
-  - `{{RULES_ROOT}}\coding-standards.mdc`
-  - `{{RULES_ROOT}}\project-naming.mdc`
-  - 如果存在 `{{RULES_ROOT}}\local-overrides.mdc`，也要读取它。
-  - 再读取以下项目记忆文件，恢复上次上下文：
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_BACKEND}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_ADMIN}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_H5}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_PARTNER_ADMIN}}.md`
-  - 读取后先输出“当前上下文摘要、未完成事项、风险/阻塞、建议下一步”，再进入开发。
-- 用户说 **「下班」**：
-  - 默认将本次会话上下文（已完成、未完成、风险、下一步）分别写回以下项目记忆文件：
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_BACKEND}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_ADMIN}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_H5}}.md`
-  - `{{MEMORY_DIR}}\{{PROJECT_MAIN_PARTNER_ADMIN}}.md`
-  - 重点保存会话工作记录：当前目标、已完成、未完成、关键决定、风险/阻塞、下一步、关键文件、验证命令，方便切换 Codex 账号后续接。
-- 若用户未额外指定范围，`上班/下班` 均按上述四个项目同时处理。
-
-
-## 下班交接模板（强制字段）
-
-- 用户说「下班」时，写入项目记忆必须使用以下固定字段，且按顺序输出。
-- 字段 1：`今日目标`（一句话，最多 2 条）
-- 字段 2：`已完成`（仅写可验证结果，按 `1. 2. 3.`）
-- 字段 3：`未完成`（按 `1. 2. 3.`，写清卡点）
-- 字段 4：`风险与阻塞`（无则写 `无`）
-- 字段 5：`下一步`（下一会话可直接执行的 1-3 步）
-- 字段 6：`关键文件`（仅列本次涉及文件绝对路径，可带行号）
-- 字段 7：`验证命令`（本次跑过/待跑命令，失败要标注原因）
-- 字段 8：`备注`（可选，记录约束或口头决定）
-- 严禁写空泛描述，如“继续优化”“后续再看”；必须可执行、可验证。
+- 文件路径尽量使用可点击绝对路径。
+- 引用代码位置时带行号。
+- 默认仅返回必要路径，避免堆大量无关路径。
+- 汇报改动时，优先按 `1. 2. 3.` 编号逐条说明；每条先写改动说明，再给文件路径。
+- 禁止返回会跳浏览器的路径形式：`file://`、`vscode-resource`、`https://file+.vscode-resource...`。
